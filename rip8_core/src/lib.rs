@@ -108,13 +108,15 @@ impl Chip {
 
     pub fn tick(&mut self) {
         let op = self.fetch();
+        // Increment PC to point to the next instruction
+        self.pc += 2;
+        // Execute the current instruction
         self.execute(op);
     }
 
     fn fetch(&mut self) -> Op {
         let hi = self.ram[self.pc as usize];
         let lo = self.ram[(self.pc + 1) as usize];
-        self.pc += 2;
         [(hi & 0xF0) >> 4, hi & 0x0F, (lo & 0xF0) >> 4, lo & 0x0F]
     }
 
@@ -158,11 +160,20 @@ impl Chip {
             // VX = VY
             [8, x, y, 0] => self.v_regs[x as usize] = self.v_regs[y as usize],
             // VX |= VY
-            [8, x, y, 1] => self.v_regs[x as usize] |= self.v_regs[y as usize],
+            [8, x, y, 1] => {
+                self.v_regs[x as usize] |= self.v_regs[y as usize];
+                self.v_regs[0xF] = 0;
+            }
             // VX &= VY
-            [8, x, y, 2] => self.v_regs[x as usize] &= self.v_regs[y as usize],
+            [8, x, y, 2] => {
+                self.v_regs[x as usize] &= self.v_regs[y as usize];
+                self.v_regs[0xF] = 0;
+            }
             // VX ^= VY
-            [8, x, y, 3] => self.v_regs[x as usize] ^= self.v_regs[y as usize],
+            [8, x, y, 3] => {
+                self.v_regs[x as usize] ^= self.v_regs[y as usize];
+                self.v_regs[0xF] = 0;
+            }
             // VX += VY
             [8, x, y, 4] => {
                 let (val, carry) = self.v_regs[x as usize].overflowing_add(self.v_regs[y as usize]);
@@ -177,10 +188,9 @@ impl Chip {
                 self.v_regs[0xF] = if borrow { 0 } else { 1 };
             }
             // VX >> 1
-            [8, x, _, 6] => {
-                let bit = self.v_regs[x as usize] & 1;
-                self.v_regs[x as usize] >>= 1;
-                self.v_regs[0xF] = bit;
+            [8, x, y, 6] => {
+                self.v_regs[x as usize] = self.v_regs[y as usize] >> 1;
+                self.v_regs[0xF] = self.v_regs[y as usize] & 1;
             }
             // VX = VY - VX
             [8, x, y, 7] => {
@@ -190,10 +200,9 @@ impl Chip {
                 self.v_regs[0xF] = if borrow { 0 } else { 1 };
             }
             // VX << 1
-            [8, x, _, 0xE] => {
-                let bit = (self.v_regs[x as usize] >> 7) & 1;
-                self.v_regs[x as usize] <<= 1;
-                self.v_regs[0xF] = bit;
+            [8, x, y, 0xE] => {
+                self.v_regs[x as usize] = self.v_regs[y as usize] << 1;
+                self.v_regs[0xF] = (self.v_regs[y as usize] >> 7) & 1;
             }
             // Skip next if VX != VY
             [9, x, y, 0] => {
@@ -210,18 +219,23 @@ impl Chip {
             // Draw at (VX, VY)
             [0xD, x, y, rows] => {
                 let mut inverted = false;
+                // If the entire sprite is located beyond the screen,
+                // then it is wrapped around and rendered.
+                let x_start = self.v_regs[x as usize] as usize % DISPLAY_WIDTH;
+                let y_start = self.v_regs[y as usize] as usize % DISPLAY_HEIGHT;
                 for row in 0..rows {
                     let addr = self.i_reg + row as u16;
                     let pixels = self.ram[addr as usize];
                     for col in 0..8 {
                         if (pixels & (0b1000_0000) >> col) != 0 {
-                            let x_offset = (self.v_regs[x as usize] + col) as usize % DISPLAY_WIDTH;
-                            let y_offset =
-                                (self.v_regs[y as usize] + row) as usize % DISPLAY_HEIGHT;
-                            let idx = x_offset + DISPLAY_WIDTH * y_offset;
-
-                            inverted |= self.display[idx];
-                            self.display[idx] ^= true;
+                            let x_offset = x_start + col;
+                            let y_offset = y_start + row as usize;
+                            // If the pixel is beyond the screen, then it is clipped
+                            if x_offset < DISPLAY_WIDTH && y_offset < DISPLAY_HEIGHT {
+                                let idx = x_offset + DISPLAY_WIDTH * y_offset;
+                                inverted |= self.display[idx];
+                                self.display[idx] ^= true;
+                            }
                         }
                     }
                 }
@@ -279,13 +293,15 @@ impl Chip {
             // Store V0-VX at I
             [0xF, x, 5, 5] => {
                 for i in 0..=x as usize {
-                    self.ram[self.i_reg as usize + i] = self.v_regs[i];
+                    self.ram[self.i_reg as usize] = self.v_regs[i];
+                    self.i_reg += 1;
                 }
             }
             // Load I into V0-VX
             [0xF, x, 6, 5] => {
                 for i in 0..=x as usize {
-                    self.v_regs[i] = self.ram[self.i_reg as usize + i];
+                    self.v_regs[i] = self.ram[self.i_reg as usize];
+                    self.i_reg += 1;
                 }
             }
             [_, _, _, _] => unimplemented!("invalid opcode"),
@@ -296,8 +312,18 @@ impl Chip {
         &self.display
     }
 
-    pub fn key_down(&mut self, idx: usize) {
+    // The function returns a boolean to indicate if the
+    // CPU should wait for the key to be released before
+    // proceeding to the next instruction. This is used
+    // for the FX0A instruction, which completes execution
+    // upon a key being released, rather than pressed.
+    pub fn key_down(&mut self, idx: usize) -> bool {
         self.keys[idx] = true;
+        if matches!(self.fetch(), [0xF, _, 0, 0xA]) {
+            true
+        } else {
+            false
+        }
     }
 
     pub fn key_up(&mut self, idx: usize) {
