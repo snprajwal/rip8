@@ -1,0 +1,7 @@
+[workspace]
+members = ["rip8_core", "rip8_pc"]
+resolver = "2"
+
+[profile.release]
+lto = true
+strip = true

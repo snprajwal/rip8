@@ -1,0 +1,16 @@
+[package]
+name = "rip8_pc"
+version = "0.1.0"
+authors = ["Prajwal S N <prajwalnadig21@gmail.com>"]
+edition = "2021"
+
+[[bin]]
+name = "rip8"
+path = "src/main.rs"
+
+[dependencies]
+rip8_core = { path = "../rip8_core" }
+sdl2 = "0.35.2"
+
+[features]
+colemak = []
