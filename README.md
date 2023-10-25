@@ -2,16 +2,28 @@
 
 Everyone's gotta write a CHIP-8 emulator. And in my case, it's gotta be in Rust ;)
 
+# Using the emulator
+
+You can run a CHIP-8 ROM on the emulator by passing it as an argument on the command line:
+
+```sh
+cargo run -- /path/to/rom
+# or
+cargo build --release
+target/rip8 /path/to/rom
+```
+For starters, there are some fun games present in the `roms` folder, along with the classic IBM logo program. Personal recommendation - play Tetris :D
+
 # CHIP-8 keypad
 
 The emulator uses the standard CHIP-8 keypad mapping on a modern keyboard. It also provides the `colemak` feature flag (use `cargo run --features colemak`) to emulate the CHIP-8 keypad correctly on the Colemak layout.
 
-<table>
+<table align="center">
   <thead>
     <tr>
-      <td>CHIP-8</td>
-      <td>QWERTY</td>
-      <td>Colemak</td>
+      <td align="center"><b>CHIP-8</b></td>
+      <td align="center"><b>QWERTY</b></td>
+      <td align="center"><b>Colemak</b></td>
     </tr>
   </thead>
   <tbody>
@@ -20,58 +32,28 @@ The emulator uses the standard CHIP-8 keypad mapping on a modern keyboard. It al
         <table>
           <tbody>
             <tr>
-              <td>1</td>
-              <td>2</td>
-              <td>3</td>
-              <td>C</td>
+              <td><tt>1</tt></td>
+              <td><tt>2</tt></td>
+              <td><tt>3</tt></td>
+              <td><tt>C</tt></td>
             </tr>
             <tr>
-              <td>4</td>
-              <td>5</td>
-              <td>6</td>
-              <td>D</td>
+              <td><tt>4</tt></td>
+              <td><tt>5</tt></td>
+              <td><tt>6</tt></td>
+              <td><tt>D</tt></td>
             </tr>
             <tr>
-              <td>7</td>
-              <td>8</td>
-              <td>9</td>
-              <td>E</td>
+              <td><tt>7</tt></td>
+              <td><tt>8</tt></td>
+              <td><tt>9</tt></td>
+              <td><tt>E</tt></td>
             </tr>
             <tr>
-              <td>A</td>
-              <td>0</td>
-              <td>B</td>
-              <td>F</td>
-            </tr>
-          </tbody>
-        </table>
-      </td>
-      <td>
-        <table>
-          <tbody>
-            <tr>
-              <td>1</td>
-              <td>2</td>
-              <td>3</td>
-              <td>4</td>
-            </tr>
-            <tr>
-              <td>Q</td>
-              <td>W</td>
-              <td>E</td>
-              <td>R</td>
-            </tr>
-            <tr>
-              <td>A</td>
-              <td>S</td>
-              <td>D</td>
-              <td>F</td>
-            </tr>
-            <tr>
-              <td>Z</td>
-              <td>X</td>
-              <td>C</td>
-              <td>V</td>
+              <td><tt>A</tt></td>
+              <td><tt>0</tt></td>
+              <td><tt>B</tt></td>
+              <td><tt>F</tt></td>
             </tr>
           </tbody>
         </table>
@@ -80,28 +62,58 @@ The emulator uses the standard CHIP-8 keypad mapping on a modern keyboard. It al
         <table>
           <tbody>
             <tr>
-              <td>1</td>
-              <td>2</td>
-              <td>3</td>
-              <td>4</td>
+              <td><tt>1</tt></td>
+              <td><tt>2</tt></td>
+              <td><tt>3</tt></td>
+              <td><tt>4</tt></td>
             </tr>
             <tr>
-              <td>Q</td>
-              <td>W</td>
-              <td>F</td>
-              <td>P</td>
+              <td><tt>Q</tt></td>
+              <td><tt>W</tt></td>
+              <td><tt>E</tt></td>
+              <td><tt>R</tt></td>
             </tr>
             <tr>
-              <td>A</td>
-              <td>R</td>
-              <td>S</td>
-              <td>T</td>
+              <td><tt>A</tt></td>
+              <td><tt>S</tt></td>
+              <td><tt>D</tt></td>
+              <td><tt>F</tt></td>
             </tr>
             <tr>
-              <td>Z</td>
-              <td>X</td>
-              <td>C</td>
-              <td>V</td>
+              <td><tt>Z</tt></td>
+              <td><tt>X</tt></td>
+              <td><tt>C</tt></td>
+              <td><tt>V</tt></td>
+            </tr>
+          </tbody>
+        </table>
+      </td>
+      <td>
+        <table>
+          <tbody>
+            <tr>
+              <td><tt>1</tt></td>
+              <td><tt>2</tt></td>
+              <td><tt>3</tt></td>
+              <td><tt>4</tt></td>
+            </tr>
+            <tr>
+              <td><tt>Q</tt></td>
+              <td><tt>W</tt></td>
+              <td><tt>F</tt></td>
+              <td><tt>P</tt></td>
+            </tr>
+            <tr>
+              <td><tt>A</tt></td>
+              <td><tt>R</tt></td>
+              <td><tt>S</tt></td>
+              <td><tt>T</tt></td>
+            </tr>
+            <tr>
+              <td><tt>Z</tt></td>
+              <td><tt>X</tt></td>
+              <td><tt>C</tt></td>
+              <td><tt>V</tt></td>
             </tr>
           </tbody>
         </table>
@@ -113,6 +125,7 @@ The emulator uses the standard CHIP-8 keypad mapping on a modern keyboard. It al
 # Testing the emulator
 
 The `tests` directory contains [this CHIP-8 test suite](https://github.com/Timendus/chip8-test-suite), which can be used to verify the correctness of the implementation.
+
 
 # License
 
