@@ -1,10 +1,10 @@
-# RIP-8 - The Rust CHIP-8 emulator
+# RIP-8 - The Rust CHIP-8 interpreter
 
-Everyone's gotta write a CHIP-8 emulator. And in my case, it's gotta be in Rust ;)
+Everyone's gotta write a CHIP-8 interpreter. And in my case, it's gotta be in Rust ;)
 
-# Using the emulator
+# Usage
 
-You can run a CHIP-8 ROM on the emulator by passing it as an argument on the command line:
+You can run a CHIP-8 ROM on the interpreter by passing it as an argument on the command line:
 
 ```sh
 cargo run -- /path/to/rom
@@ -16,7 +16,7 @@ For starters, there are some fun games present in the `roms` folder, along with 
 
 # CHIP-8 keypad
 
-The emulator uses the standard CHIP-8 keypad mapping on a modern keyboard. It also provides the `colemak` feature flag (use `cargo run --features colemak`) to emulate the CHIP-8 keypad correctly on the Colemak layout.
+The interpreter uses the standard CHIP-8 keypad mapping on a modern keyboard. It also provides the `colemak` feature flag (use `cargo run --features colemak`) to emulate the CHIP-8 keypad correctly on the Colemak layout.
 
 <table align="center">
   <thead>
@@ -122,7 +122,7 @@ The emulator uses the standard CHIP-8 keypad mapping on a modern keyboard. It al
   </tbody>
 </table>
 
-# Testing the emulator
+# Testing
 
 The `tests` directory contains [this CHIP-8 test suite](https://github.com/Timendus/chip8-test-suite), which can be used to verify the correctness of the implementation.
 
