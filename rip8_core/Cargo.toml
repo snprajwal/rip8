@@ -2,7 +2,7 @@
 name = "rip8_core"
 version = "0.1.0"
 authors = ["Prajwal S N <prajwalnadig21@gmail.com>"]
-edition = "2021"
+edition = "2024"
 
 [dependencies]
 rand = "0.8.5"
